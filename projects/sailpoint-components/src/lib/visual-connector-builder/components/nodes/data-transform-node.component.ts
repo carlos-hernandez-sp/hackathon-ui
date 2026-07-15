@@ -1,11 +1,12 @@
 import { Component, computed } from '@angular/core';
-import { CustomNodeComponent, Vflow } from 'ngx-vflow';
+import { Vflow } from 'ngx-vflow';
 import { DataTransformNodeData } from '../../models/node-types';
+import { ConnectorNodeBase } from './connector-node.base';
 
 @Component({
     selector: 'app-data-transform-node',
     template: `
-        <div class="node-card transform-node">
+        <div class="node-card transform-node" (mousedown)="selectThisNode($event)">
             <div class="node-header">
                 <span class="badge badge-transform">Transform</span>
             </div>
@@ -68,7 +69,7 @@ import { DataTransformNodeData } from '../../models/node-types';
     ],
     imports: [Vflow],
 })
-export class DataTransformNodeComponent extends CustomNodeComponent<DataTransformNodeData> {
+export class DataTransformNodeComponent extends ConnectorNodeBase<DataTransformNodeData> {
     readonly previewMappings = computed(() => {
         const mappings = this.data()?.config.mappings ?? [];
         const preview = mappings.slice(0, 3).map((m) => `${m.source} → ${m.target}`);

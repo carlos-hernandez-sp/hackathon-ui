@@ -76,6 +76,9 @@ export class ConnectorBuilderStore {
             type: NODE_COMPONENT_MAP[type],
             data: signal(createDefaultNodeData(type)),
             selected: signal(false),
+            width: signal(220),
+            height: signal(88),
+            draggable: signal(true),
         } as Node;
 
         this.vflowNodes.update((nodes) => [...nodes, newNode]);
@@ -89,9 +92,15 @@ export class ConnectorBuilderStore {
     }
 
     selectNode(id: string | null): void {
+        if (this.selectedNodeId() === id) {
+            return;
+        }
         this.selectedNodeId.set(id);
         for (const node of this.vflowNodes()) {
-            node.selected?.set(node.id === id);
+            const shouldSelect = node.id === id;
+            if (node.selected?.() !== shouldSelect) {
+                node.selected?.set(shouldSelect);
+            }
         }
     }
 
@@ -138,21 +147,13 @@ export class ConnectorBuilderStore {
         }
     }
 
-    syncNodePosition(id: string, point: Point): void {
-        const node = this.vflowNodes().find((n) => n.id === id);
-        node?.point.set({ ...point });
-    }
-
-    /** Only sync position/selection from ngx-vflow — ignore spurious remove events. */
+    /** Sync selection from ngx-vflow — position is updated in-place on shared point signals. */
     handleNodeChanges(changes: NodeChange[]): void {
         for (const change of changes) {
-            if (change.type === 'position') {
-                this.syncNodePosition(change.id, change.point);
-            }
             if (change.type === 'select') {
-                if (change.selected) {
+                if (change.selected && this.selectedNodeId() !== change.id) {
                     this.selectNode(change.id);
-                } else if (this.selectedNodeId() === change.id) {
+                } else if (!change.selected && this.selectedNodeId() === change.id) {
                     this.selectNode(null);
                 }
             }

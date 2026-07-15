@@ -29,6 +29,7 @@ import { ConnectorBuilderStore } from '../services/connector-builder.store';
                 [entitiesSelectable]="true"
                 [keyboardShortcuts]="{ multiSelection: null }"
                 (connect)="onConnect($event)"
+                (click)="onCanvasClick($event)"
             />
             @if (!store.hasNodes()) {
                 <div class="canvas-hint">
@@ -130,13 +131,29 @@ export class FlowCanvasComponent {
             return;
         }
 
-        const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-        const x = event.clientX - rect.left - 100;
-        const y = event.clientY - rect.top - 40;
-        this.store.addNode(nodeType, { x: Math.max(20, x), y: Math.max(20, y) });
+        const vflow = this.vflowRef();
+        let point = { x: 120, y: 120 };
+        if (vflow) {
+            const flowPoint = vflow.documentPointToFlowPoint({
+                x: event.clientX,
+                y: event.clientY,
+            });
+            point = {
+                x: Math.max(20, flowPoint.x - 100),
+                y: Math.max(20, flowPoint.y - 40),
+            };
+        }
+        this.store.addNode(nodeType, point);
     }
 
     onConnect(connection: Connection): void {
         this.store.addEdge(connection.source, connection.target);
+    }
+
+    onCanvasClick(event: MouseEvent): void {
+        const target = event.target as Element;
+        if (!target.closest('.vflow-node') && !target.closest('.default-handle')) {
+            this.store.selectNode(null);
+        }
     }
 }

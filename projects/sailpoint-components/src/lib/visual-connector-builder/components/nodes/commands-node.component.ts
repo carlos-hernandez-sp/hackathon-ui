@@ -1,11 +1,12 @@
 import { Component, computed } from '@angular/core';
-import { CustomNodeComponent, Vflow } from 'ngx-vflow';
+import { Vflow } from 'ngx-vflow';
 import { CommandsNodeData } from '../../models/node-types';
+import { ConnectorNodeBase } from './connector-node.base';
 
 @Component({
     selector: 'app-commands-node',
     template: `
-        <div class="node-card commands-node">
+        <div class="node-card commands-node" (mousedown)="selectThisNode($event)">
             <div class="node-header">
                 <span class="badge badge-cmd">Commands</span>
             </div>
@@ -34,7 +35,7 @@ import { CommandsNodeData } from '../../models/node-types';
     ],
     imports: [Vflow],
 })
-export class CommandsNodeComponent extends CustomNodeComponent<CommandsNodeData> {
+export class CommandsNodeComponent extends ConnectorNodeBase<CommandsNodeData> {
     readonly enabledCount = computed(() => {
         const config = this.data()?.config;
         if (!config) return 0;

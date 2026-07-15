@@ -1,11 +1,12 @@
 import { Component, computed } from '@angular/core';
-import { CustomNodeComponent, Vflow } from 'ngx-vflow';
+import { Vflow } from 'ngx-vflow';
 import { ResponseParserNodeData } from '../../models/node-types';
+import { ConnectorNodeBase } from './connector-node.base';
 
 @Component({
     selector: 'app-response-parser-node',
     template: `
-        <div class="node-card parser-node">
+        <div class="node-card parser-node" (mousedown)="selectThisNode($event)">
             <div class="node-header">
                 <span class="badge badge-parser">Parser</span>
             </div>
@@ -36,7 +37,7 @@ import { ResponseParserNodeData } from '../../models/node-types';
     ],
     imports: [Vflow],
 })
-export class ResponseParserNodeComponent extends CustomNodeComponent<ResponseParserNodeData> {
+export class ResponseParserNodeComponent extends ConnectorNodeBase<ResponseParserNodeData> {
     readonly recordsPath = computed(() => {
         const path = this.data()?.config.recordsPath ?? 'data';
         return path.split(',')[0] || 'data';

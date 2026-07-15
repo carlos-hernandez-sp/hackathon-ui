@@ -1,11 +1,12 @@
 import { Component, computed } from '@angular/core';
-import { CustomNodeComponent, Vflow } from 'ngx-vflow';
+import { Vflow } from 'ngx-vflow';
 import { AccountSchemaNodeData } from '../../models/node-types';
+import { ConnectorNodeBase } from './connector-node.base';
 
 @Component({
     selector: 'app-account-schema-node',
     template: `
-        <div class="node-card schema-node">
+        <div class="node-card schema-node" (mousedown)="selectThisNode($event)">
             <div class="node-header">
                 <span class="badge badge-schema">Schema</span>
             </div>
@@ -37,7 +38,7 @@ import { AccountSchemaNodeData } from '../../models/node-types';
     ],
     imports: [Vflow],
 })
-export class AccountSchemaNodeComponent extends CustomNodeComponent<AccountSchemaNodeData> {
+export class AccountSchemaNodeComponent extends ConnectorNodeBase<AccountSchemaNodeData> {
     readonly identityAttr = computed(() => this.data()?.config.identityAttribute ?? 'identity');
     readonly attributeCount = computed(() => this.data()?.config.attributes.length ?? 0);
 }

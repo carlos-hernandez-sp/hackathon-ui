@@ -1,11 +1,12 @@
 import { Component, computed } from '@angular/core';
-import { CustomNodeComponent, Vflow } from 'ngx-vflow';
+import { Vflow } from 'ngx-vflow';
 import { ApiRequestNodeData, truncateEndpoint } from '../../models/node-types';
+import { ConnectorNodeBase } from './connector-node.base';
 
 @Component({
     selector: 'app-api-request-node',
     template: `
-        <div class="node-card api-node">
+        <div class="node-card api-node" (mousedown)="selectThisNode($event)">
             <div class="node-header">
                 <span class="badge badge-api">API</span>
                 <span class="method-pill" [class]="methodClass()">
@@ -88,7 +89,7 @@ import { ApiRequestNodeData, truncateEndpoint } from '../../models/node-types';
     ],
     imports: [Vflow],
 })
-export class ApiRequestNodeComponent extends CustomNodeComponent<ApiRequestNodeData> {
+export class ApiRequestNodeComponent extends ConnectorNodeBase<ApiRequestNodeData> {
     readonly method = computed(() => this.data()?.config.method ?? 'GET');
 
     readonly methodClass = computed(() => `method-${this.method().toLowerCase()}`);

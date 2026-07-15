@@ -1,11 +1,12 @@
 import { Component, computed } from '@angular/core';
-import { CustomNodeComponent, Vflow } from 'ngx-vflow';
+import { Vflow } from 'ngx-vflow';
 import { EntitlementsNodeData, truncateEndpoint } from '../../models/node-types';
+import { ConnectorNodeBase } from './connector-node.base';
 
 @Component({
     selector: 'app-entitlements-node',
     template: `
-        <div class="node-card ent-node">
+        <div class="node-card ent-node" (mousedown)="selectThisNode($event)">
             <div class="node-header">
                 <span class="badge badge-ent">Entitlements</span>
                 <span class="method-pill">{{ method() }}</span>
@@ -39,7 +40,7 @@ import { EntitlementsNodeData, truncateEndpoint } from '../../models/node-types'
     ],
     imports: [Vflow],
 })
-export class EntitlementsNodeComponent extends CustomNodeComponent<EntitlementsNodeData> {
+export class EntitlementsNodeComponent extends ConnectorNodeBase<EntitlementsNodeData> {
     readonly method = computed(() => this.data()?.config.method ?? 'GET');
     readonly endpointPreview = computed(() => truncateEndpoint(this.data()?.config.endpoint ?? '/groups'));
 }

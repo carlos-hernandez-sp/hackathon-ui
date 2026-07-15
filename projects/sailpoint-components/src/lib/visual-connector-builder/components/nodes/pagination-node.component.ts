@@ -1,11 +1,12 @@
 import { Component, computed } from '@angular/core';
-import { CustomNodeComponent, Vflow } from 'ngx-vflow';
+import { Vflow } from 'ngx-vflow';
 import { PaginationNodeData } from '../../models/node-types';
+import { ConnectorNodeBase } from './connector-node.base';
 
 @Component({
     selector: 'app-pagination-node',
     template: `
-        <div class="node-card pagination-node">
+        <div class="node-card pagination-node" (mousedown)="selectThisNode($event)">
             <div class="node-header">
                 <span class="badge badge-pages">Pages</span>
             </div>
@@ -57,7 +58,7 @@ import { PaginationNodeData } from '../../models/node-types';
     ],
     imports: [Vflow],
 })
-export class PaginationNodeComponent extends CustomNodeComponent<PaginationNodeData> {
+export class PaginationNodeComponent extends ConnectorNodeBase<PaginationNodeData> {
     readonly strategy = computed(() => this.data()?.config.strategy ?? 'offset');
 
     readonly pageSize = computed(() => this.data()?.config.pageSize ?? 100);

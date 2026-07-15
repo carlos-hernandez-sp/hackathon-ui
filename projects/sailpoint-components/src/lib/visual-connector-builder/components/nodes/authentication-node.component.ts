@@ -1,11 +1,12 @@
 import { Component, computed } from '@angular/core';
-import { CustomNodeComponent, Vflow } from 'ngx-vflow';
+import { Vflow } from 'ngx-vflow';
 import { AUTH_TYPE_LABELS, AuthenticationNodeData } from '../../models/node-types';
+import { ConnectorNodeBase } from './connector-node.base';
 
 @Component({
     selector: 'app-authentication-node',
     template: `
-        <div class="node-card auth-node">
+        <div class="node-card auth-node" (mousedown)="selectThisNode($event)">
             <div class="node-header">
                 <span class="badge badge-auth">Auth</span>
                 <span class="auth-type">{{ authLabel() }}</span>
@@ -39,7 +40,7 @@ import { AUTH_TYPE_LABELS, AuthenticationNodeData } from '../../models/node-type
     ],
     imports: [Vflow],
 })
-export class AuthenticationNodeComponent extends CustomNodeComponent<AuthenticationNodeData> {
+export class AuthenticationNodeComponent extends ConnectorNodeBase<AuthenticationNodeData> {
     readonly authLabel = computed(() => AUTH_TYPE_LABELS[this.data()?.config.authType ?? 'apiKey']);
     readonly baseUrl = computed(() => this.data()?.config.apiUrl || 'https://api.example.com');
 }

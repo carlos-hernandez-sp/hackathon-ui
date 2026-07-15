@@ -1,11 +1,12 @@
 import { Component, computed } from '@angular/core';
-import { CustomNodeComponent, Vflow } from 'ngx-vflow';
+import { Vflow } from 'ngx-vflow';
 import { StatefulAggregationNodeData } from '../../models/node-types';
+import { ConnectorNodeBase } from './connector-node.base';
 
 @Component({
     selector: 'app-stateful-aggregation-node',
     template: `
-        <div class="node-card stateful-node">
+        <div class="node-card stateful-node" (mousedown)="selectThisNode($event)">
             <div class="node-header">
                 <span class="badge badge-stateful">Stateful</span>
                 <span class="status-pill" [class.enabled]="enabled()">{{ enabled() ? 'ON' : 'OFF' }}</span>
@@ -39,7 +40,7 @@ import { StatefulAggregationNodeData } from '../../models/node-types';
     ],
     imports: [Vflow],
 })
-export class StatefulAggregationNodeComponent extends CustomNodeComponent<StatefulAggregationNodeData> {
+export class StatefulAggregationNodeComponent extends ConnectorNodeBase<StatefulAggregationNodeData> {
     readonly enabled = computed(() => this.data()?.config.enabled ?? false);
     readonly stateField = computed(() => this.data()?.config.stateField ?? 'updatedAt');
 }

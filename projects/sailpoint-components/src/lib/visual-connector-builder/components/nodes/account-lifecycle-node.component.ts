@@ -1,11 +1,12 @@
 import { Component, computed } from '@angular/core';
-import { CustomNodeComponent, Vflow } from 'ngx-vflow';
+import { Vflow } from 'ngx-vflow';
 import { AccountLifecycleNodeData } from '../../models/node-types';
+import { ConnectorNodeBase } from './connector-node.base';
 
 @Component({
     selector: 'app-account-lifecycle-node',
     template: `
-        <div class="node-card lifecycle-node">
+        <div class="node-card lifecycle-node" (mousedown)="selectThisNode($event)">
             <div class="node-header">
                 <span class="badge badge-lifecycle">Lifecycle</span>
             </div>
@@ -33,7 +34,7 @@ import { AccountLifecycleNodeData } from '../../models/node-types';
     ],
     imports: [Vflow],
 })
-export class AccountLifecycleNodeComponent extends CustomNodeComponent<AccountLifecycleNodeData> {
+export class AccountLifecycleNodeComponent extends ConnectorNodeBase<AccountLifecycleNodeData> {
     readonly configuredOps = computed(() => {
         const config = this.data()?.config;
         if (!config) return 0;
