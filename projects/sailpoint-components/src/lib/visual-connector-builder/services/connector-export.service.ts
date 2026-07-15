@@ -17,7 +17,7 @@ export class ConnectorExportService {
         if (!this.store.canExport()) {
             return {
                 success: false,
-                message: 'Configure at least one API Request node with an endpoint before exporting.',
+                message: 'Add at least one node to the canvas before exporting.',
             };
         }
 

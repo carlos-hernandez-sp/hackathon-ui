@@ -1,6 +1,5 @@
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     DestroyRef,
     HostListener,
@@ -78,7 +77,6 @@ import { ConnectorBuilderStore } from '../services/connector-builder.store';
         `,
     ],
     imports: [Vflow],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FlowCanvasComponent {
     readonly store = inject(ConnectorBuilderStore);

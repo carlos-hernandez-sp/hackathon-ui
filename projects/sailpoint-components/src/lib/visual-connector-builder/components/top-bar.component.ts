@@ -17,7 +17,9 @@ import { ConnectorBuilderStore } from '../services/connector-builder.store';
                 mat-flat-button
                 class="generate-btn"
                 [disabled]="!store.canExport()"
-                matTooltip="Generate and download connector ZIP"
+                [matTooltip]="store.canExport()
+                    ? 'Generate and download connector ZIP'
+                    : 'Add at least one node to the canvas first'"
                 (click)="generateZip.emit()"
             >
                 <mat-icon>download</mat-icon>

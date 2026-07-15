@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { BuilderTopBarComponent } from './components/top-bar.component';
 import { FlowCanvasComponent } from './components/flow-canvas.component';
@@ -19,7 +19,6 @@ import { ConnectorExportService } from './services/connector-export.service';
         MatSnackBarModule,
     ],
     providers: [ConnectorBuilderStore, ConnectorExportService],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VisualConnectorBuilderComponent {
     private readonly exportService = inject(ConnectorExportService);
