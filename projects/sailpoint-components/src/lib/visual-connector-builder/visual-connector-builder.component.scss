@@ -1,0 +1,87 @@
+:host {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    font-family: 'Poppins', sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+.builder-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.builder-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: #1e293b;
+    border-color: #334155;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.sidebar-left {
+    border-right: 1px solid #334155;
+}
+
+.sidebar-right {
+    border-left: 1px solid #334155;
+}
+
+.sidebar app-node-palette,
+.sidebar app-properties-panel {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+::ng-deep .palette-card.mat-mdc-card {
+    --mdc-elevated-card-container-color: #0f172a;
+    --mdc-elevated-card-container-shape: 10px;
+    background: #0f172a !important;
+    box-shadow: none !important;
+}
+
+.canvas-area {
+    flex: 1;
+    min-width: 0;
+    background: #0f172a;
+    position: relative;
+}
+
+::ng-deep .snack-success {
+    --mdc-snackbar-container-color: #065f46;
+}
+
+::ng-deep .snack-error {
+    --mdc-snackbar-container-color: #991b1b;
+}
+
+::ng-deep .properties-panel .mat-mdc-form-field {
+    --mdc-outlined-text-field-outline-color: #475569;
+    --mdc-outlined-text-field-label-text-color: #94a3b8;
+    --mdc-outlined-text-field-input-text-color: #e2e8f0;
+}
+
+::ng-deep .properties-panel .mat-mdc-text-field-wrapper {
+    background: #0f172a;
+}
+
+::ng-deep .properties-panel .mat-mdc-select-value,
+::ng-deep .properties-panel .mat-mdc-input-element {
+    color: #e2e8f0 !important;
+}

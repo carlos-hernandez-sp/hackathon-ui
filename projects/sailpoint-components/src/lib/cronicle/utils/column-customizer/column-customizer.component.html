@@ -1,0 +1,29 @@
+<!-- Trigger -->
+<button mat-raised-button class="customizeColumnsToggle" (click)="toggleSelector()">
+  Customize Columns
+</button>
+
+<!-- Dropdown Panel -->
+@if (showSelector) {
+  <div
+    #panelRef
+    class="dropdown-panel"
+    cdkDropList
+    (cdkDropListDropped)="dropColumn($event)"
+    >
+    @for (col of allColumns; track col) {
+      <div
+        class="column-option"
+        cdkDrag
+        >
+        <input
+          type="checkbox"
+          [checked]="isDisplayed(col)"
+          (change)="toggleColumn(col)"
+          />
+        {{ col }}
+        <span class="drag-handle">☰</span>
+      </div>
+    }
+  </div>
+}

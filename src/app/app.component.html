@@ -1,0 +1,212 @@
+@if (isDemoRoute()) {
+  <router-outlet></router-outlet>
+} @else {
+  <mat-toolbar color="secondary" class="mat-elevation-z6 toolbar-with-border">
+    @if (isSmallScreen && isConnected) {
+      <button
+        mat-icon-button
+        (click)="toggleSidenav()"
+        aria-label="Toggle sidenav"
+        >
+        <mat-icon>menu</mat-icon>
+      </button>
+    }
+    @if (logoPath && !isSmallScreen) {
+      <img
+        #logoImage
+        style="height: 50px"
+        [src]="logoPath"
+        (error)="useFallbackLogo()"
+        alt="SailPoint Developer Community Logo"
+        class="logo"
+        />
+    }
+    <span class="spacer"></span>
+
+    @if (isConnected) {
+      <div class="connection-status-navbar">
+        <mat-icon class="connected-icon">check_circle</mat-icon>
+        <span class="connection-text">Connected</span>
+        @if (sessionStatus || currentEnvironment) {
+          <div class="session-info">
+            <span class="session-type">{{ (sessionStatus?.authtype || currentEnvironment?.authtype || 'UNKNOWN') }}</span>
+          </div>
+        }
+      </div>
+    }
+    @if (isConnected) {
+      <div class="session-actions">
+        <button mat-icon-button
+          (click)="disconnectFromISC()"
+          aria-label="Disconnect from tenant"
+          title="Disconnect"
+          class="disconnect-button">
+          <mat-icon>logout</mat-icon>
+        </button>
+      </div>
+    }
+    <button mat-icon-button (click)="toggleTheme()" aria-label="Toggle theme">
+      <mat-icon>{{ isDarkTheme ? "dark_mode" : "light_mode" }}</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <mat-sidenav-container class="app-container">
+    <mat-sidenav
+      #sidenav
+      [mode]="isSmallScreen ? 'over' : 'side'"
+      [opened]="isConnected && sidenavOpened"
+      (openedChange)="sidenavOpened = $event"
+      >
+      @if (isConnected) {
+        <mat-nav-list>
+          <a
+            mat-list-item
+            class="sidebar-link"
+            routerLink="/home"
+            routerLinkActive="active-link"
+            (click)="onNavItemClick($event)"
+            >
+            <mat-icon class="card-icon">home</mat-icon>
+            Home
+          </a>
+          @if (isComponentEnabled('transforms')) {
+            <a
+              mat-list-item
+              class="sidebar-link"
+              routerLink="/transforms"
+              routerLinkActive="active-link"
+              (click)="onNavItemClick($event)"
+              >
+              <mat-icon class="card-icon">transform</mat-icon>
+              Transforms
+            </a>
+          }
+          @if (isComponentEnabled('attach-rule')) {
+            <a
+              mat-list-item
+              class="sidebar-link"
+              routerLink="/attach-rule"
+              routerLinkActive="active-link"
+              (click)="onNavItemClick($event)"
+              >
+              <mat-icon class="card-icon">attachment</mat-icon>
+              Attach Rule
+            </a>
+          }
+          @if (isComponentEnabled('identities')) {
+            <a
+              mat-list-item
+              class="sidebar-link"
+              routerLink="/identities"
+              routerLinkActive="active-link"
+              (click)="onNavItemClick($event)"
+              >
+              <mat-icon class="card-icon">assignment_ind</mat-icon>
+              Identities
+            </a>
+          }
+          @if (isComponentEnabled('theme-picker')) {
+            <a
+              mat-list-item
+              class="sidebar-link"
+              routerLink="/theme-picker"
+              routerLinkActive="active-link"
+              (click)="onNavItemClick($event)"
+              >
+              <mat-icon class="card-icon">palette</mat-icon>
+              Theme Picker
+            </a>
+          }
+          @if (isComponentEnabled('report-example')) {
+            <a
+              mat-list-item
+              class="sidebar-link"
+              routerLink="/report-example"
+              routerLinkActive="active-link"
+              (click)="onNavItemClick($event)"
+              >
+              <mat-icon class="card-icon">insert_chart</mat-icon>
+              Report Example
+            </a>
+          }
+          @if (isComponentEnabled('component-selector')) {
+            <a
+              mat-list-item
+              class="sidebar-link"
+              routerLink="/component-selector"
+              routerLinkActive="active-link"
+              (click)="onNavItemClick($event)"
+              >
+              <mat-icon class="card-icon">settings</mat-icon>
+              Component Selector
+            </a>
+          }
+          @if (isComponentEnabled('certification-management')) {
+            <a
+              mat-list-item class="sidebar-link"
+              routerLink="/certification-management"
+              routerLinkActive="active-link"
+              (click)="onNavItemClick($event)"
+              >
+              <mat-icon class="card-icon">rate_review</mat-icon>
+              Certification Management
+            </a>
+          }
+          @if (isComponentEnabled('accounts')) {
+            <a mat-list-item class="sidebar-link" routerLink="/accounts" routerLinkActive="active-link"
+              (click)="onNavItemClick($event)">
+              <mat-icon class="card-icon">dashboard</mat-icon>
+              Accounts
+            </a>
+          }
+          @if (isComponentEnabled('cronicle')) {
+            <a mat-list-item class="sidebar-link" routerLink="/cronicle" routerLinkActive="active-link"
+              (click)="onNavItemClick($event)">
+              <mat-icon class="card-icon">dashboard</mat-icon>
+              Cronicle
+            </a>
+          }
+          @if (isComponentEnabled('owner-graph')) {
+            <a mat-list-item class="sidebar-link" routerLink="/owner-graph" routerLinkActive="active-link"
+              (click)="onNavItemClick($event)">
+              <mat-icon class="card-icon">dashboard</mat-icon>
+              Owner Graph
+            </a>
+          }
+          @if (isComponentEnabled('colab')) {
+            <a mat-list-item class="sidebar-link" routerLink="/colab" routerLinkActive="active-link"
+              (click)="onNavItemClick($event)">
+              <mat-icon class="card-icon">dashboard</mat-icon>
+              Colab
+            </a>
+          }
+          @if (isComponentEnabled('config-hub')) {
+            <a mat-list-item class="sidebar-link" routerLink="/config-hub" routerLinkActive="active-link"
+              (click)="onNavItemClick($event)">
+              <mat-icon class="card-icon">dashboard</mat-icon>
+              Config Hub
+            </a>
+          }
+          @if (isComponentEnabled('saas-connectivity-creator')) {
+            <a mat-list-item class="sidebar-link" routerLink="/saas-connectivity-creator" routerLinkActive="active-link"
+              (click)="onNavItemClick($event, true)">
+              <mat-icon class="card-icon">dashboard</mat-icon>
+              Saas Connectivity Creator
+            </a>
+          }
+          <a mat-list-item class="sidebar-link" routerLink="/visual-connector-builder" routerLinkActive="active-link"
+            (click)="onNavItemClick($event, true)">
+            <mat-icon class="card-icon">hub</mat-icon>
+            Visual Connector Builder
+          </a>
+        </mat-nav-list>
+      }
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <div class="main-content">
+        <router-outlet></router-outlet>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+}

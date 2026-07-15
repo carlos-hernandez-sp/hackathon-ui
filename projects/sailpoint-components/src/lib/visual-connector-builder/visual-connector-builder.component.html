@@ -1,0 +1,17 @@
+<div class="builder-layout">
+    <app-builder-top-bar (generateZip)="onGenerateZip()" />
+
+    <div class="builder-body">
+        <aside class="sidebar sidebar-left">
+            <app-node-palette />
+        </aside>
+
+        <main class="canvas-area">
+            <app-flow-canvas />
+        </main>
+
+        <aside class="sidebar sidebar-right">
+            <app-properties-panel />
+        </aside>
+    </div>
+</div>
