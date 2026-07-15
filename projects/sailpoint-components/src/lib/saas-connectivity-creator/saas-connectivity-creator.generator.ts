@@ -781,6 +781,7 @@ ${methods.join('\n\n')}
             },
             devDependencies: {
                 '@types/jest': '^27.0.1',
+                '@types/node': '^18.19.0',
                 '@vercel/ncc': '^0.38.1',
                 'cross-env': '7.0.3',
                 jest: '^27.0.6',
@@ -829,6 +830,7 @@ ${methods.join('\n\n')}
                 skipLibCheck: true,
                 sourceMap: true,
                 forceConsistentCasingInFileNames: true,
+                typeRoots: ['./node_modules/@types'],
             },
             include: ['src/**/*'],
             exclude: ['node_modules', '**/*.spec.ts', '**/*.spec.js'],
@@ -858,6 +860,9 @@ node_modules/
 # Compiled source
 dist/
 coverage/
+
+# Local connector test config (may contain secrets)
+config.json
 `;
     }
 

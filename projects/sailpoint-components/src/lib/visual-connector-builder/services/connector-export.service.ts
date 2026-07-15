@@ -6,6 +6,10 @@ import {
     injectVisualBuilderMetadata,
     mapCanvasToWizardState,
 } from '../utils/canvas-to-wizard-state.mapper';
+import {
+    generateConfigExample,
+    generateVisualConnectorClient,
+} from '../utils/visual-connector-client.generator';
 
 export const ZIP_FILENAME = 'custom-sailpoint-connector.zip';
 
@@ -32,6 +36,7 @@ export class ConnectorExportService {
         folder.file('package.json', ConnectorCodeGenerator.generatePackageJson(state));
         folder.file('tsconfig.json', ConnectorCodeGenerator.generateTsConfig());
         folder.file('.gitignore', ConnectorCodeGenerator.generateGitIgnore());
+        folder.file('config.json.example', generateConfigExample(mapping));
 
         const src = folder.folder('src')!;
         const indexTs = injectVisualBuilderMetadata(
@@ -39,7 +44,7 @@ export class ConnectorExportService {
             mapping,
         );
         src.file('index.ts', indexTs);
-        src.file(`${state.connectorName}-client.ts`, ConnectorCodeGenerator.generateClientTs(state));
+        src.file(`${state.connectorName}-client.ts`, generateVisualConnectorClient(mapping));
 
         const blob = await zip.generateAsync({ type: 'blob' });
         const url = URL.createObjectURL(blob);

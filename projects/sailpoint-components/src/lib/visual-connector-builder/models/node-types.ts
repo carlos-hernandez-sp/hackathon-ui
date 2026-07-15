@@ -43,7 +43,7 @@ export type ConnectorNodeData = ApiRequestNodeData | DataTransformNodeData | Pag
 
 export const DEFAULT_API_REQUEST_CONFIG: ApiRequestConfig = {
     method: 'GET',
-    endpoint: '',
+    endpoint: '/users',
     headers: [],
 };
 
