@@ -10,6 +10,8 @@ Drag nodes onto a canvas, configure them in a properties panel, wire the flow to
 
 **Live demo (local):** [http://localhost:4200/#/visual-connector-builder](http://localhost:4200/#/visual-connector-builder)
 
+![SailPoint Visual Connector Builder — node palette, flow canvas, and properties panel](./docs/visual-connector-builder.png)
+
 ---
 
 ## Overview
