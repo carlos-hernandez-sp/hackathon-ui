@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { CustomNodeComponent, Vflow } from 'ngx-vflow';
 import { DataTransformNodeData } from '../../models/node-types';
 
@@ -67,15 +67,14 @@ import { DataTransformNodeData } from '../../models/node-types';
         `,
     ],
     imports: [Vflow],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DataTransformNodeComponent extends CustomNodeComponent<DataTransformNodeData> {
-    previewMappings(): string[] {
+    readonly previewMappings = computed(() => {
         const mappings = this.data()?.config.mappings ?? [];
         const preview = mappings.slice(0, 3).map((m) => `${m.source} → ${m.target}`);
         if (mappings.length > 3) {
             preview.push(`+${mappings.length - 3} more`);
         }
         return preview.length > 0 ? preview : ['id → identity'];
-    }
+    });
 }

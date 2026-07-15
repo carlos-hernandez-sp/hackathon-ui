@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { CustomNodeComponent, Vflow } from 'ngx-vflow';
 import { PaginationNodeData } from '../../models/node-types';
 
@@ -56,14 +56,9 @@ import { PaginationNodeData } from '../../models/node-types';
         `,
     ],
     imports: [Vflow],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaginationNodeComponent extends CustomNodeComponent<PaginationNodeData> {
-    strategy(): string {
-        return this.data()?.config.strategy ?? 'offset';
-    }
+    readonly strategy = computed(() => this.data()?.config.strategy ?? 'offset');
 
-    pageSize(): number {
-        return this.data()?.config.pageSize ?? 100;
-    }
+    readonly pageSize = computed(() => this.data()?.config.pageSize ?? 100);
 }

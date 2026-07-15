@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { CustomNodeComponent, Vflow } from 'ngx-vflow';
 import { ApiRequestNodeData, truncateEndpoint } from '../../models/node-types';
 
@@ -87,18 +87,13 @@ import { ApiRequestNodeData, truncateEndpoint } from '../../models/node-types';
         `,
     ],
     imports: [Vflow],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApiRequestNodeComponent extends CustomNodeComponent<ApiRequestNodeData> {
-    method(): string {
-        return this.data()?.config.method ?? 'GET';
-    }
+    readonly method = computed(() => this.data()?.config.method ?? 'GET');
 
-    methodClass(): string {
-        return `method-${this.method().toLowerCase()}`;
-    }
+    readonly methodClass = computed(() => `method-${this.method().toLowerCase()}`);
 
-    endpointPreview(): string {
-        return truncateEndpoint(this.data()?.config.endpoint ?? '');
-    }
+    readonly endpointPreview = computed(() =>
+        truncateEndpoint(this.data()?.config.endpoint ?? ''),
+    );
 }

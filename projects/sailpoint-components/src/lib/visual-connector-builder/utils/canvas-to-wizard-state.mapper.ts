@@ -1,14 +1,25 @@
 import {
     AccountAttribute,
+    AuthType,
+    CommandSelection,
     DEFAULT_ACCOUNT_ATTRIBUTES,
+    DEFAULT_ENTITLEMENT_ATTRIBUTES,
     WizardState,
 } from '../../saas-connectivity-creator/saas-connectivity-creator.models';
 import { CanvasSnapshot } from '../models/canvas-state';
 import {
-    ApiRequestNodeData,
+    AccountLifecycleNodeData,
+    AccountSchemaNodeData,
+    AuthenticationNodeData,
+    CommandsConfig,
+    CommandsNodeData,
     ConnectorNodeData,
     DataTransformNodeData,
+    DEFAULT_COMMANDS_CONFIG,
+    EntitlementsNodeData,
     PaginationNodeData,
+    ResponseParserNodeData,
+    StatefulAggregationNodeData,
 } from '../models/node-types';
 
 const CONNECTOR_NAME = 'custom-sailpoint-connector';
@@ -24,6 +35,11 @@ export interface CanvasMappingResult {
     apiHeaders: { key: string; value: string }[];
     pagination?: PaginationNodeData['config'];
     mappings: { source: string; target: string }[];
+    responseParser?: ResponseParserNodeData['config'];
+    entitlements?: EntitlementsNodeData['config'];
+    accountLifecycle?: AccountLifecycleNodeData['config'];
+    stateful?: StatefulAggregationNodeData['config'];
+    authType: AuthType;
 }
 
 function resolveEndpoint(endpoint: string): { baseUrl: string; apiPath: string } {
@@ -31,7 +47,6 @@ function resolveEndpoint(endpoint: string): { baseUrl: string; apiPath: string }
     if (!trimmed) {
         return { baseUrl: DEFAULT_BASE_URL, apiPath: DEFAULT_API_PATH };
     }
-
     try {
         const url = new URL(trimmed);
         const path = `${url.pathname}${url.search}`;
@@ -45,11 +60,12 @@ function resolveEndpoint(endpoint: string): { baseUrl: string; apiPath: string }
     }
 }
 
-function buildAccountAttributes(mappings: { source: string; target: string }[]): AccountAttribute[] {
+function buildAccountAttributesFromMappings(
+    mappings: { source: string; target: string }[],
+): AccountAttribute[] {
     if (mappings.length === 0) {
         return DEFAULT_ACCOUNT_ATTRIBUTES.map((attr) => ({ ...attr }));
     }
-
     return mappings.map((mapping) => ({
         name: mapping.target,
         type: 'string' as const,
@@ -105,75 +121,164 @@ function findNodeData<T extends ConnectorNodeData['nodeType']>(
     return (node?.data as Extract<ConnectorNodeData, { nodeType: T }>) ?? null;
 }
 
+function buildAuthConfig(auth: AuthenticationNodeData['config']): Record<string, string> {
+    return {
+        apiUrl: auth.apiUrl,
+        keyLabel: auth.keyLabel,
+        tokenLabel: auth.tokenLabel,
+        usernameLabel: auth.usernameLabel,
+        passwordLabel: auth.passwordLabel,
+        tokenUrl: auth.tokenUrl,
+        scopes: auth.scopes,
+    };
+}
+
+function resolveCommands(
+    commandsData: CommandsNodeData | null,
+    entitlementsData: EntitlementsNodeData | null,
+    lifecycleData: AccountLifecycleNodeData | null,
+): CommandSelection {
+    const base: CommandsConfig = commandsData?.config
+        ? { ...commandsData.config }
+        : { ...DEFAULT_COMMANDS_CONFIG };
+
+    if (entitlementsData && !commandsData) {
+        base.entitlementList = true;
+        base.entitlementRead = true;
+    }
+
+    if (lifecycleData && !commandsData) {
+        if (lifecycleData.config.createEndpoint) base.accountCreate = true;
+        if (lifecycleData.config.updateEndpoint) base.accountUpdate = true;
+        if (lifecycleData.config.deleteEndpoint) base.accountDelete = true;
+        if (lifecycleData.config.enableEndpoint) base.accountEnable = true;
+        if (lifecycleData.config.disableEndpoint) base.accountDisable = true;
+        if (lifecycleData.config.unlockEndpoint) base.accountUnlock = true;
+        if (lifecycleData.config.changePasswordEndpoint) base.changePassword = true;
+    }
+
+    return base;
+}
+
 export function mapCanvasToWizardState(snapshot: CanvasSnapshot): CanvasMappingResult {
+    const authData = findNodeData(snapshot, 'authentication');
     const apiData = findNodeData(snapshot, 'api-request');
+    const parserData = findNodeData(snapshot, 'response-parser');
     const transformData = findNodeData(snapshot, 'data-transform');
     const paginationData = findNodeData(snapshot, 'pagination');
+    const schemaData = findNodeData(snapshot, 'account-schema');
+    const commandsData = findNodeData(snapshot, 'commands');
+    const entitlementsData = findNodeData(snapshot, 'entitlements');
+    const lifecycleData = findNodeData(snapshot, 'account-lifecycle');
+    const statefulData = findNodeData(snapshot, 'stateful-aggregation');
 
     const endpoint = apiData?.config.endpoint?.trim() ?? '';
-    const { baseUrl, apiPath } = resolveEndpoint(endpoint);
+    const { baseUrl: endpointBase, apiPath } = resolveEndpoint(endpoint);
     const method = apiData?.config.method ?? 'GET';
     const apiHeaders = (apiData?.config.headers ?? []).filter((h) => h.key || h.value);
     const mappings = transformData?.config.mappings ?? [{ source: 'id', target: 'identity' }];
-    const accountAttributes = buildAccountAttributes(mappings);
-    const identityAttribute = mappings[0]?.target ?? 'identity';
     const pipelineOrder = topologicalOrder(snapshot);
+
+    const authType: AuthType = authData?.config.authType ?? 'apiKey';
+    const baseUrl = authData?.config.apiUrl?.trim() || endpointBase;
+
+    let accountAttributes: AccountAttribute[];
+    let displayAttribute: string;
+    let identityAttribute: string;
+    let groupAttribute: string;
+
+    if (schemaData) {
+        accountAttributes = schemaData.config.attributes.map((a) => ({
+            name: a.name,
+            type: a.type,
+            description: a.description,
+            multi: a.multi,
+            entitlement: a.entitlement,
+            managed: a.managed,
+        }));
+        displayAttribute = schemaData.config.displayAttribute;
+        identityAttribute = schemaData.config.identityAttribute;
+        groupAttribute = schemaData.config.groupAttribute;
+    } else {
+        accountAttributes = buildAccountAttributesFromMappings(mappings);
+        displayAttribute = mappings[0]?.target ?? 'identity';
+        identityAttribute = mappings[0]?.target ?? 'identity';
+        groupAttribute = entitlementsData?.config.groupAttribute ?? '';
+    }
+
+    const commands = resolveCommands(commandsData, entitlementsData, lifecycleData);
+    const supportsStateful = statefulData?.config.enabled ?? false;
+
+    const entitlementAttributes: AccountAttribute[] = entitlementsData
+        ? entitlementsData.config.attributes.map((a) => ({
+              name: a.name,
+              type: 'string' as const,
+              description: a.description,
+              multi: false,
+              entitlement: false,
+              managed: false,
+          }))
+        : [];
+
+    const additionalConfig = [
+        {
+            sectionTitle: 'API Configuration',
+            sectionHelpMessage: 'Endpoint and HTTP settings generated from the visual builder canvas',
+            items: [
+                { key: 'apiEndpoint', label: 'API Endpoint Path', type: 'text' as const, required: true },
+                { key: 'httpMethod', label: 'HTTP Method', type: 'text' as const, required: true },
+            ],
+        },
+    ];
+
+    if (lifecycleData) {
+        additionalConfig.push({
+            sectionTitle: 'Account Lifecycle',
+            sectionHelpMessage: 'Endpoints for provisioning operations (use {id} placeholder)',
+            items: [
+                { key: 'createEndpoint', label: 'Create Endpoint', type: 'text' as const, required: false },
+                { key: 'updateEndpoint', label: 'Update Endpoint', type: 'text' as const, required: false },
+                { key: 'deleteEndpoint', label: 'Delete Endpoint', type: 'text' as const, required: false },
+                { key: 'enableEndpoint', label: 'Enable Endpoint', type: 'text' as const, required: false },
+                { key: 'disableEndpoint', label: 'Disable Endpoint', type: 'text' as const, required: false },
+                { key: 'unlockEndpoint', label: 'Unlock Endpoint', type: 'text' as const, required: false },
+                { key: 'changePasswordEndpoint', label: 'Change Password Endpoint', type: 'text' as const, required: false },
+            ],
+        });
+    }
+
+    if (entitlementsData) {
+        additionalConfig.push({
+            sectionTitle: 'Entitlements API',
+            sectionHelpMessage: 'Settings for entitlement aggregation',
+            items: [
+                { key: 'entitlementsEndpoint', label: 'Entitlements Endpoint', type: 'text' as const, required: true },
+                { key: 'entitlementsMethod', label: 'HTTP Method', type: 'text' as const, required: true },
+            ],
+        });
+    }
 
     const state: WizardState = {
         connectorName: CONNECTOR_NAME,
         displayName: 'Custom SailPoint Connector',
         description: 'Generated by the SailPoint Visual Connector Builder prototype',
         keyType: 'simple',
-        supportsStatefulCommands: false,
-        authType: 'apiKey',
-        authConfig: {
-            apiUrl: baseUrl,
-            keyLabel: 'API Key',
-        },
-        commands: {
-            testConnection: true,
-            accountList: true,
-            accountRead: true,
-            accountCreate: false,
-            accountUpdate: false,
-            accountDelete: false,
-            accountEnable: false,
-            accountDisable: false,
-            accountUnlock: false,
-            changePassword: false,
-            entitlementList: false,
-            entitlementRead: false,
-            sourceDataDiscover: false,
-            sourceDataRead: false,
-        },
+        supportsStatefulCommands: supportsStateful,
+        authType,
+        authConfig: authData ? buildAuthConfig(authData.config) : { apiUrl: baseUrl, keyLabel: 'API Key' },
+        commands,
         accountAttributes,
-        displayAttribute: identityAttribute,
+        displayAttribute,
         identityAttribute,
-        groupAttribute: '',
-        entitlementAttributes: [],
-        entitlementDisplayAttribute: 'name',
-        entitlementIdentityAttribute: 'id',
+        groupAttribute,
+        entitlementAttributes:
+            entitlementAttributes.length > 0
+                ? entitlementAttributes
+                : DEFAULT_ENTITLEMENT_ATTRIBUTES.map((a) => ({ ...a })),
+        entitlementDisplayAttribute: entitlementsData?.config.displayAttribute ?? 'name',
+        entitlementIdentityAttribute: entitlementsData?.config.identityAttribute ?? 'id',
         accountCreateFields: [],
-        additionalConfig: [
-            {
-                sectionTitle: 'API Configuration',
-                sectionHelpMessage: 'Endpoint and HTTP settings generated from the visual builder canvas',
-                items: [
-                    {
-                        key: 'apiEndpoint',
-                        label: 'API Endpoint Path',
-                        type: 'text',
-                        required: true,
-                    },
-                    {
-                        key: 'httpMethod',
-                        label: 'HTTP Method',
-                        type: 'text',
-                        required: true,
-                    },
-                ],
-            },
-        ],
+        additionalConfig,
     };
 
     return {
@@ -185,6 +290,11 @@ export function mapCanvasToWizardState(snapshot: CanvasSnapshot): CanvasMappingR
         apiHeaders,
         pagination: paginationData?.config,
         mappings,
+        responseParser: parserData?.config,
+        entitlements: entitlementsData?.config,
+        accountLifecycle: lifecycleData?.config,
+        stateful: statefulData?.config,
+        authType,
     };
 }
 
@@ -194,10 +304,15 @@ export function injectVisualBuilderMetadata(
 ): string {
     const header = `// Generated by SailPoint Visual Connector Builder [PROTOTYPE]
 // Pipeline order: ${mapping.pipelineOrder.join(' -> ') || 'none'}
+// Auth: ${mapping.authType}
 // API: ${mapping.httpMethod} ${mapping.apiEndpoint}
 // API path: ${mapping.apiPath}
 ${mapping.pagination ? `// Pagination: ${mapping.pagination.strategy}, pageSize=${mapping.pagination.pageSize}` : ''}
+${mapping.responseParser ? `// Response parser: records=[${mapping.responseParser.recordsPath}]` : ''}
+${mapping.entitlements ? `// Entitlements: ${mapping.entitlements.method} ${mapping.entitlements.endpoint}` : ''}
+${mapping.stateful?.enabled ? `// Stateful aggregation: field=${mapping.stateful.stateField}` : ''}
 // Attribute mappings: ${mapping.mappings.map((m) => `${m.source} -> ${m.target}`).join(', ')}
+// Enabled commands: ${Object.entries(mapping.state.commands).filter(([, v]) => v).map(([k]) => k).join(', ')}
 
 `;
 

@@ -1,8 +1,15 @@
 import { computed, Injectable, signal, WritableSignal } from '@angular/core';
 import { Edge, Node, NodeChange, Point } from 'ngx-vflow';
 import { ApiRequestNodeComponent } from '../components/nodes/api-request-node.component';
+import { AuthenticationNodeComponent } from '../components/nodes/authentication-node.component';
+import { AccountLifecycleNodeComponent } from '../components/nodes/account-lifecycle-node.component';
+import { AccountSchemaNodeComponent } from '../components/nodes/account-schema-node.component';
+import { CommandsNodeComponent } from '../components/nodes/commands-node.component';
 import { DataTransformNodeComponent } from '../components/nodes/data-transform-node.component';
+import { EntitlementsNodeComponent } from '../components/nodes/entitlements-node.component';
 import { PaginationNodeComponent } from '../components/nodes/pagination-node.component';
+import { ResponseParserNodeComponent } from '../components/nodes/response-parser-node.component';
+import { StatefulAggregationNodeComponent } from '../components/nodes/stateful-aggregation-node.component';
 import {
     ConnectorNodeData,
     ConnectorNodeType,
@@ -10,9 +17,16 @@ import {
 } from '../models/node-types';
 
 const NODE_COMPONENT_MAP = {
+    authentication: AuthenticationNodeComponent,
     'api-request': ApiRequestNodeComponent,
-    'data-transform': DataTransformNodeComponent,
+    'response-parser': ResponseParserNodeComponent,
     pagination: PaginationNodeComponent,
+    'data-transform': DataTransformNodeComponent,
+    'account-schema': AccountSchemaNodeComponent,
+    commands: CommandsNodeComponent,
+    entitlements: EntitlementsNodeComponent,
+    'account-lifecycle': AccountLifecycleNodeComponent,
+    'stateful-aggregation': StatefulAggregationNodeComponent,
 } as const;
 
 function nodeDataSignal(node: Node): WritableSignal<ConnectorNodeData> | undefined {

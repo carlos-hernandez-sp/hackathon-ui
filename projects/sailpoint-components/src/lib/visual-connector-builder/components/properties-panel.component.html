@@ -1,0 +1,255 @@
+<div class="properties-panel">
+    <h3 class="panel-title">Properties</h3>
+
+    @if (!store.selectedNode()) {
+        <div class="empty-state">
+            <mat-icon>touch_app</mat-icon>
+            <p>Select a node to configure.</p>
+        </div>
+    } @else if (form()) {
+        <form [formGroup]="form()!" class="properties-form">
+            @switch (store.selectedNode()!.nodeType) {
+                @case ('authentication') {
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Auth Type</mat-label>
+                        <mat-select formControlName="authType">
+                            @for (type of authTypes; track type) {
+                                <mat-option [value]="type">{{ authTypeLabels[type] }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Base URL</mat-label>
+                        <input matInput formControlName="apiUrl" placeholder="https://api.example.com" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>API Key Label</mat-label>
+                        <input matInput formControlName="keyLabel" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Bearer Token Label</mat-label>
+                        <input matInput formControlName="tokenLabel" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Username Label</mat-label>
+                        <input matInput formControlName="usernameLabel" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Password Label</mat-label>
+                        <input matInput formControlName="passwordLabel" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>OAuth Token URL</mat-label>
+                        <input matInput formControlName="tokenUrl" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>OAuth Scopes</mat-label>
+                        <input matInput formControlName="scopes" />
+                    </mat-form-field>
+                }
+
+                @case ('api-request') {
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>HTTP Method</mat-label>
+                        <mat-select formControlName="method">
+                            @for (method of httpMethods; track method) {
+                                <mat-option [value]="method">{{ method }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Endpoint URL</mat-label>
+                        <input matInput formControlName="endpoint" placeholder="https://api.example.com/users or /users" />
+                    </mat-form-field>
+                    <div class="section-label">Headers</div>
+                    <div formArrayName="headers">
+                        @for (header of headersArray.controls; track $index; let i = $index) {
+                            <div [formGroupName]="i" class="header-row">
+                                <mat-form-field appearance="outline" class="header-key">
+                                    <mat-label>Key</mat-label>
+                                    <input matInput formControlName="key" />
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="header-value">
+                                    <mat-label>Value</mat-label>
+                                    <input matInput formControlName="value" />
+                                </mat-form-field>
+                                <button mat-icon-button type="button" (click)="removeHeader(i)"><mat-icon>close</mat-icon></button>
+                            </div>
+                        }
+                    </div>
+                    <button mat-stroked-button type="button" class="add-btn" (click)="addHeader()"><mat-icon>add</mat-icon> Add Header</button>
+                }
+
+                @case ('response-parser') {
+                    <p class="hint">Comma-separated JSON keys tried in order (e.g. data,items,results)</p>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Records Path</mat-label>
+                        <input matInput formControlName="recordsPath" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Cursor Path</mat-label>
+                        <input matInput formControlName="cursorPath" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Entitlements Path</mat-label>
+                        <input matInput formControlName="entitlementsPath" />
+                    </mat-form-field>
+                }
+
+                @case ('data-transform') {
+                    <div class="section-label">Attribute Mappings</div>
+                    <div formArrayName="mappings">
+                        @for (mapping of mappingsArray.controls; track $index; let i = $index) {
+                            <div [formGroupName]="i" class="mapping-row">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Source</mat-label>
+                                    <input matInput formControlName="source" />
+                                </mat-form-field>
+                                <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Target</mat-label>
+                                    <input matInput formControlName="target" />
+                                </mat-form-field>
+                                <button mat-icon-button type="button" (click)="removeMapping(i)"><mat-icon>close</mat-icon></button>
+                            </div>
+                        }
+                    </div>
+                    <button mat-stroked-button type="button" class="add-btn" (click)="addMapping()"><mat-icon>add</mat-icon> Add Mapping</button>
+                }
+
+                @case ('pagination') {
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Strategy</mat-label>
+                        <mat-select formControlName="strategy">
+                            @for (strategy of paginationStrategies; track strategy) {
+                                <mat-option [value]="strategy">{{ strategy }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Page Size</mat-label>
+                        <input matInput type="number" formControlName="pageSize" min="1" />
+                    </mat-form-field>
+                }
+
+                @case ('account-schema') {
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Display Attribute</mat-label>
+                        <input matInput formControlName="displayAttribute" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Identity Attribute</mat-label>
+                        <input matInput formControlName="identityAttribute" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Group Attribute</mat-label>
+                        <input matInput formControlName="groupAttribute" />
+                    </mat-form-field>
+                    <div class="section-label">Attributes</div>
+                    <div formArrayName="attributes">
+                        @for (attr of schemaAttributesArray.controls; track $index; let i = $index) {
+                            <div [formGroupName]="i" class="attr-row" style="flex-wrap: wrap;">
+                                <mat-form-field appearance="outline" style="flex:1;min-width:100px">
+                                    <mat-label>Name</mat-label>
+                                    <input matInput formControlName="name" />
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" style="width:100px">
+                                    <mat-label>Type</mat-label>
+                                    <mat-select formControlName="type">
+                                        @for (t of attributeTypes; track t) {
+                                            <mat-option [value]="t">{{ t }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                                <mat-checkbox formControlName="entitlement">Entitlement</mat-checkbox>
+                                <button mat-icon-button type="button" (click)="removeSchemaAttribute(i)"><mat-icon>close</mat-icon></button>
+                            </div>
+                        }
+                    </div>
+                    <button mat-stroked-button type="button" class="add-btn" (click)="addSchemaAttribute()"><mat-icon>add</mat-icon> Add Attribute</button>
+                }
+
+                @case ('commands') {
+                    <div class="section-label">Standard Commands</div>
+                    <div class="cmd-grid">
+                        <mat-checkbox formControlName="testConnection">Test Connection</mat-checkbox>
+                        <mat-checkbox formControlName="accountList">Account List</mat-checkbox>
+                        <mat-checkbox formControlName="accountRead">Account Read</mat-checkbox>
+                        <mat-checkbox formControlName="accountCreate">Account Create</mat-checkbox>
+                        <mat-checkbox formControlName="accountUpdate">Account Update</mat-checkbox>
+                        <mat-checkbox formControlName="accountDelete">Account Delete</mat-checkbox>
+                        <mat-checkbox formControlName="accountEnable">Account Enable</mat-checkbox>
+                        <mat-checkbox formControlName="accountDisable">Account Disable</mat-checkbox>
+                        <mat-checkbox formControlName="accountUnlock">Account Unlock</mat-checkbox>
+                        <mat-checkbox formControlName="changePassword">Change Password</mat-checkbox>
+                        <mat-checkbox formControlName="entitlementList">Entitlement List</mat-checkbox>
+                        <mat-checkbox formControlName="entitlementRead">Entitlement Read</mat-checkbox>
+                        <mat-checkbox formControlName="sourceDataDiscover">Source Data Discover</mat-checkbox>
+                        <mat-checkbox formControlName="sourceDataRead">Source Data Read</mat-checkbox>
+                    </div>
+                }
+
+                @case ('entitlements') {
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>HTTP Method</mat-label>
+                        <mat-select formControlName="method">
+                            @for (method of httpMethods; track method) {
+                                <mat-option [value]="method">{{ method }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Entitlements Endpoint</mat-label>
+                        <input matInput formControlName="endpoint" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Group Attribute (on account)</mat-label>
+                        <input matInput formControlName="groupAttribute" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Display Attribute</mat-label>
+                        <input matInput formControlName="displayAttribute" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Identity Attribute</mat-label>
+                        <input matInput formControlName="identityAttribute" />
+                    </mat-form-field>
+                    <div class="section-label">Entitlement Attributes</div>
+                    <div formArrayName="attributes">
+                        @for (attr of entitlementAttributesArray.controls; track $index; let i = $index) {
+                            <div [formGroupName]="i" class="mapping-row">
+                                <mat-form-field appearance="outline" style="flex:1">
+                                    <mat-label>Name</mat-label>
+                                    <input matInput formControlName="name" />
+                                </mat-form-field>
+                                <button mat-icon-button type="button" (click)="removeEntitlementAttribute(i)"><mat-icon>close</mat-icon></button>
+                            </div>
+                        }
+                    </div>
+                    <button mat-stroked-button type="button" class="add-btn" (click)="addEntitlementAttribute()"><mat-icon>add</mat-icon> Add Attribute</button>
+                }
+
+                @case ('account-lifecycle') {
+                    <div class="section-label">Lifecycle Endpoints</div>
+                    <p class="hint">Use &#123;id&#125; as placeholder for account identity</p>
+                    <mat-form-field appearance="outline" class="full-width"><mat-label>Create</mat-label><input matInput formControlName="createEndpoint" /></mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width"><mat-label>Update</mat-label><input matInput formControlName="updateEndpoint" /></mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width"><mat-label>Delete</mat-label><input matInput formControlName="deleteEndpoint" /></mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width"><mat-label>Enable</mat-label><input matInput formControlName="enableEndpoint" /></mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width"><mat-label>Disable</mat-label><input matInput formControlName="disableEndpoint" /></mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width"><mat-label>Unlock</mat-label><input matInput formControlName="unlockEndpoint" /></mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width"><mat-label>Change Password</mat-label><input matInput formControlName="changePasswordEndpoint" /></mat-form-field>
+                }
+
+                @case ('stateful-aggregation') {
+                    <mat-checkbox formControlName="enabled">Enable Stateful Aggregation</mat-checkbox>
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>State Field</mat-label>
+                        <input matInput formControlName="stateField" placeholder="updatedAt" />
+                    </mat-form-field>
+                    <p class="hint">Adds supportsStatefulCommands and spConnEnableStatefulCommands to connector-spec</p>
+                }
+            }
+        </form>
+    }
+</div>

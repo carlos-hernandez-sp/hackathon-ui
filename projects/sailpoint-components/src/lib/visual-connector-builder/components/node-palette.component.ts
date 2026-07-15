@@ -117,24 +117,16 @@ export class NodePaletteComponent {
     private readonly store = inject(ConnectorBuilderStore);
 
     readonly paletteItems: PaletteItem[] = [
-        {
-            type: 'api-request',
-            label: 'API Request',
-            description: 'HTTP call to external API',
-            icon: 'public',
-        },
-        {
-            type: 'data-transform',
-            label: 'Data Transform',
-            description: 'Map source attributes',
-            icon: 'sync',
-        },
-        {
-            type: 'pagination',
-            label: 'Pagination',
-            description: 'Paginate API responses',
-            icon: 'layers',
-        },
+        { type: 'authentication', label: 'Authentication', description: 'API key, OAuth2, basic, bearer', icon: 'vpn_key' },
+        { type: 'api-request', label: 'API Request', description: 'HTTP call to external API', icon: 'public' },
+        { type: 'response-parser', label: 'Response Parser', description: 'Extract records from JSON', icon: 'data_object' },
+        { type: 'pagination', label: 'Pagination', description: 'Paginate API responses', icon: 'layers' },
+        { type: 'data-transform', label: 'Data Transform', description: 'Map source attributes', icon: 'sync' },
+        { type: 'account-schema', label: 'Account Schema', description: 'Account attribute definitions', icon: 'table_chart' },
+        { type: 'commands', label: 'STD Commands', description: 'Enable connector operations', icon: 'terminal' },
+        { type: 'entitlements', label: 'Entitlements', description: 'Groups and entitlement schema', icon: 'groups' },
+        { type: 'account-lifecycle', label: 'Account Lifecycle', description: 'Create, update, delete endpoints', icon: 'autorenew' },
+        { type: 'stateful-aggregation', label: 'Stateful Aggregation', description: 'Incremental account sync', icon: 'history' },
     ];
 
     addNode(type: ConnectorNodeType): void {

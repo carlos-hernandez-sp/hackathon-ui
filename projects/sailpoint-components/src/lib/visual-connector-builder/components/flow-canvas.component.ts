@@ -26,6 +26,7 @@ import { ConnectorBuilderStore } from '../services/connector-builder.store';
                 [edges]="store.vflowEdges()"
                 [snapGrid]="[20, 20]"
                 [background]="gridBackground"
+                [entitiesSelectable]="true"
                 [keyboardShortcuts]="{ multiSelection: null }"
                 (connect)="onConnect($event)"
             />
