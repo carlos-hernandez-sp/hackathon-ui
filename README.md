@@ -1,4 +1,6 @@
-# UI Development Kit
+# UI Development Kit — Visual Connector Builder (Hackathon)
+
+> **Teammates:** start here → **[SETUP.md](./SETUP.md)** for clone, install, and run instructions.
 
 <a id="readme-top"></a>
 
